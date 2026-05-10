@@ -1,0 +1,49 @@
+name: Deploy to Supabase
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Get Supabase URL
+        run: |
+          echo "SUPABASE_PROJECT_REF=your-project-ref" >> $GITHUB_ENV
+        env:
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+
+      - name: Run type generation
+        run: |
+          cd apps/api
+          npx prisma generate
+
+      - name: Run database migrations
+        run: |
+          cd apps/api
+          npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Build API
+        run: |
+          cd apps/api
+          npm install
+          npm run build
+
+      - name: Deploy to production (optional)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "Deploy your built application to your hosting provider"
+          # Add your deployment commands here
