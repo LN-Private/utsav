@@ -1,0 +1,292 @@
+// Prisma Schema for Utsav - Nepal's Ceremony Service Marketplace
+// Generated based on types from packages/shared/src/types/
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// Enums
+// ============================================
+
+enum UserRole {
+  customer
+  provider
+  admin
+}
+
+enum SubscriptionTier {
+  free
+  basic
+  premium
+}
+
+enum BookingStatus {
+  pending
+  confirmed
+  in_progress
+  completed
+  cancelled
+  disputed
+}
+
+enum PaymentMethod {
+  esewa
+  khalti
+  cash
+  bank_transfer
+  card
+}
+
+enum PaymentStatus {
+  pending
+  processing
+  completed
+  failed
+  refunded
+  cancelled
+}
+
+enum PriceType {
+  fixed
+  per_person
+  per_hour
+  package
+}
+
+// ============================================
+// Models
+// ============================================
+
+// Base User model for authentication and profile
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  phone        String   @unique
+  password     String
+  fullName     String
+  role         UserRole @default(customer)
+  avatarUrl    String?
+  isVerified   Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  provider     Provider?
+  customerBookings Booking[] @relation("CustomerBookings")
+  reviews      Review[]  @relation("CustomerReviews")
+
+  // Indexes
+  @@index([role])
+  @@index([isActive])
+  @@index([createdAt])
+}
+
+// Provider profile (extends User for providers)
+model Provider {
+  id              String           @id @default(cuid())
+  userId          String           @unique
+  businessName   String
+  description    String?
+  categoryId     String
+  location       String?          // Kathmandu neighborhood/area
+  latitude       Float?
+  longitude      Float?
+  verified       Boolean          @default(false)
+  subscriptionTier SubscriptionTier @default(free)
+  rating         Float            @default(0)
+  reviewCount    Int              @default(0)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  // Relations
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category        ServiceCategory @relation(fields: [categoryId], references: [id])
+  services        Service[]
+  providerBookings Booking[]       @relation("ProviderBookings")
+  reviews         Review[]         @relation("ProviderReviews")
+
+  // Indexes
+  @@index([categoryId])
+  @@index([verified])
+  @@index([rating])
+  @@index([location])
+  @@index([subscriptionTier])
+}
+
+// Service Categories (pre-seeded)
+model ServiceCategory {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  icon        String?
+  description String?
+  parentId    String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Self-referential for subcategories
+  parent      ServiceCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    ServiceCategory[] @relation("CategoryHierarchy")
+
+  // Relations
+  providers   Provider[]
+  services    Service[]
+
+  // Indexes
+  @@index([slug])
+  @@index([isActive])
+  @@index([sortOrder])
+}
+
+// Service offered by a provider
+model Service {
+  id          String    @id @default(cuid())
+  providerId  String
+  categoryId  String
+  title       String
+  description String?
+  priceMin    Decimal   @db.Decimal(12, 2)
+  priceMax    Decimal   @db.Decimal(12, 2)
+  priceType   PriceType @default(fixed)
+  images      String[]  // JSON array of image URLs
+  isActive    Boolean   @default(true)
+  isFeatured  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  provider    Provider  @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  category    ServiceCategory @relation(fields: [categoryId], references: [id])
+  bookings    Booking[]
+  reviews     Review[]
+  packages    ServicePackage[]
+
+  // Indexes
+  @@index([providerId])
+  @@index([categoryId])
+  @@index([isActive])
+  @@index([isFeatured])
+  @@index([priceMin])
+  @@index([priceMax])
+}
+
+// Service packages (optional packages within a service)
+model ServicePackage {
+  id          String   @id @default(cuid())
+  serviceId   String
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(12, 2)
+  features    String[] // JSON array of features
+  isPopular   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  service     Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([serviceId])
+}
+
+// Booking model
+model Booking {
+  id                String        @id @default(cuid())
+  serviceId         String
+  customerId        String
+  providerId        String
+  eventDate         DateTime
+  eventLocation     String
+  eventLocationLat  Float?
+  eventLocationLng  Float?
+  guestCount        Int
+  totalAmount       Decimal       @db.Decimal(12, 2)
+  commissionAmount  Decimal       @db.Decimal(12, 2)
+  platformFee       Decimal       @db.Decimal(12, 2)
+  providerPayout    Decimal       @db.Decimal(12, 2)
+  status            BookingStatus @default(pending)
+  specialRequests   String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  // Relations
+  service           Service       @relation(fields: [serviceId], references: [id])
+  customer          User          @relation("CustomerBookings", fields: [customerId], references: [id])
+  provider          Provider      @relation("ProviderBookings", fields: [providerId], references: [id])
+  payment           Payment?
+  review            Review?
+
+  // Indexes
+  @@index([serviceId])
+  @@index([customerId])
+  @@index([providerId])
+  @@index([status])
+  @@index([eventDate])
+  @@index([createdAt])
+  @@index([customerId, status])
+  @@index([providerId, status])
+}
+
+// Payment model with Nepal payment gateways
+model Payment {
+  id              String        @id @default(cuid())
+  bookingId       String        @unique
+  amount          Decimal       @db.Decimal(12, 2)
+  currency        String        @default("NPR")
+  method          PaymentMethod
+  transactionId   String?
+  gatewayResponse Json?
+  status          PaymentStatus @default(pending)
+  paidAt          DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  booking         Booking       @relation(fields: [bookingId], references: [id])
+
+  // Indexes
+  @@index([status])
+  @@index([method])
+  @@index([transactionId])
+  @@index([createdAt])
+}
+
+// Review model for services
+model Review {
+  id              String   @id @default(cuid())
+  bookingId       String   @unique
+  customerId      String
+  providerId      String
+  serviceId       String
+  rating          Int      // 1-5
+  comment         String?
+  images          String[] // JSON array of image URLs
+  isVerified      Boolean  @default(false) // Verified if from completed booking
+  providerResponse String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  booking         Booking  @relation(fields: [bookingId], references: [id])
+  customer        User     @relation("CustomerReviews", fields: [customerId], references: [id])
+  provider        Provider @relation("ProviderReviews", fields: [providerId], references: [id])
+  service         Service  @relation(fields: [serviceId], references: [id])
+
+  // Indexes
+  @@index([customerId])
+  @@index([providerId])
+  @@index([serviceId])
+  @@index([rating])
+  @@index([isVerified])
+  @@index([createdAt])
+  @@index([providerId, rating])
+}
