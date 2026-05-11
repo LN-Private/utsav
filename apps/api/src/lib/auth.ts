@@ -24,7 +24,8 @@ export interface AuthTokens {
 // Configuration
 // ============================================
 
-const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-me';
+const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'default-access-secret-change-me';
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'default-refresh-secret-change-me';
 const JWT_ACCESS_EXPIRY = process.env.JWT_ACCESS_TOKEN_EXPIRY || '15m';
 const JWT_REFRESH_EXPIRY = process.env.JWT_REFRESH_TOKEN_EXPIRY || '7d';
 const BCRYPT_ROUNDS = 12;
@@ -62,11 +63,11 @@ export async function verifyPassword(password: string, hashedPassword: string): 
  * @returns Object containing access and refresh tokens
  */
 export function generateTokens(payload: TokenPayload): AuthTokens {
-  const accessToken = jwt.sign(payload, JWT_SECRET, {
+  const accessToken = jwt.sign(payload, JWT_ACCESS_SECRET, {
     expiresIn: JWT_ACCESS_EXPIRY as jwt.SignOptions['expiresIn'],
   });
 
-  const refreshToken = jwt.sign(payload, JWT_SECRET, {
+  const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET, {
     expiresIn: JWT_REFRESH_EXPIRY as jwt.SignOptions['expiresIn'],
   });
 
@@ -80,7 +81,7 @@ export function generateTokens(payload: TokenPayload): AuthTokens {
  * @throws Error if token is invalid or expired
  */
 export function verifyAccessToken(token: string): TokenPayload {
-  return jwt.verify(token, JWT_SECRET) as TokenPayload;
+  return jwt.verify(token, JWT_ACCESS_SECRET) as TokenPayload;
 }
 
 /**
@@ -90,7 +91,7 @@ export function verifyAccessToken(token: string): TokenPayload {
  * @throws Error if token is invalid or expired
  */
 export function verifyRefreshToken(token: string): TokenPayload {
-  return jwt.verify(token, JWT_SECRET) as TokenPayload;
+  return jwt.verify(token, JWT_REFRESH_SECRET) as TokenPayload;
 }
 
 /**
@@ -99,9 +100,19 @@ export function verifyRefreshToken(token: string): TokenPayload {
  * @returns Access token string
  */
 export function generateAccessToken(payload: TokenPayload): string {
-  return jwt.sign(payload, JWT_SECRET, {
+  return jwt.sign(payload, JWT_ACCESS_SECRET, {
     expiresIn: JWT_ACCESS_EXPIRY as jwt.SignOptions['expiresIn'],
   });
+}
+
+/**
+ * Verify and decode an access token
+ * @param token - JWT token to verify
+ * @returns Decoded token payload
+ * @throws Error if token is invalid or expired
+ */
+export function verifyToken(token: string): TokenPayload {
+  return jwt.verify(token, JWT_ACCESS_SECRET) as TokenPayload;
 }
 
 // ============================================

@@ -11,14 +11,19 @@
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
     "dev:api": "npm run dev -w @utsav/api",
     "dev:web": "npm run dev -w @utsav/web",
-    "build": "npm run build -w @utsav/shared && npm run build -w @utsav/api && npm run build -w @utsav/web",
+    "build": "npm run build -w @utsav/shared && npm run build -w @utsav/api",
     "build:api": "npm run build -w @utsav/api",
     "build:web": "npm run build -w @utsav/web",
+    "start": "npm run start -w @utsav/api",
+    "start:prod": "docker-compose up -d",
+    "stop:prod": "docker-compose down",
     "lint": "eslint .",
     "typecheck": "npm run typecheck -w @utsav/api && npm run typecheck -w @utsav/web"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
     "concurrently": "^8.2.2",
     "eslint": "^8.55.0",
     "typescript": "^5.3.3"

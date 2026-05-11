@@ -5,7 +5,14 @@ import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth';
+import userRoutes from './routes/users';
+import serviceRoutes from './routes/services';
+import bookingRoutes from './routes/bookings';
+import paymentRoutes from './routes/payments';
+import reviewRoutes from './routes/reviews';
+import adminRoutes from './routes/admin';
 import { HttpStatus, ErrorCodes } from '@utsav/shared';
+import { rateLimiter, authRateLimiter } from './middleware/rateLimit';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -45,7 +52,25 @@ app.get('/health', (_req: Request, res: Response) => {
 // ============================================
 
 // Mount auth routes at /api/auth
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authRateLimiter, authRoutes);
+
+// Mount user routes at /api/users
+app.use('/api/users', rateLimiter, userRoutes);
+
+// Mount service routes at /api/services
+app.use('/api/services', rateLimiter, serviceRoutes);
+
+// Mount booking routes at /api/bookings
+app.use('/api/bookings', rateLimiter, bookingRoutes);
+
+// Mount payment routes at /api/payments
+app.use('/api/payments', rateLimiter, paymentRoutes);
+
+// Mount review routes at /api/reviews
+app.use('/api/reviews', rateLimiter, reviewRoutes);
+
+// Mount admin routes at /api/admin
+app.use('/api/admin', rateLimiter, adminRoutes);
 
 // ============================================
 // Error Handling
@@ -85,6 +110,12 @@ app.listen(PORT, () => {
   console.log(`🚀 Utsav API running on port ${PORT}`);
   console.log(`📍 Health check: http://localhost:${PORT}/health`);
   console.log(`🔐 Auth routes: http://localhost:${PORT}/api/auth`);
+  console.log(`👤 User routes: http://localhost:${PORT}/api/users`);
+  console.log(`📸 Service routes: http://localhost:${PORT}/api/services`);
+  console.log(`📅 Booking routes: http://localhost:${PORT}/api/bookings`);
+  console.log(`💳 Payment routes: http://localhost:${PORT}/api/payments`);
+  console.log(`⭐ Review routes: http://localhost:${PORT}/api/reviews`);
+  console.log(`🛠️ Admin routes: http://localhost:${PORT}/api/admin`);
 });
 
 export default app;

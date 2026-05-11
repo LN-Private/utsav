@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "apps/api/src/index.ts",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": [
+          "apps/api/prisma/schema.prisma",
+          "apps/api/node_modules/.prisma"
+        ],
+        "maxLambdaSize": "50mb"
+      }
+    },
+    {
+      "src": "apps/web/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist",
+        "installCommand": "npm install && cd apps/api && npx prisma generate",
+        "buildCommand": "npm run build -w @utsav/api && npm run build -w @utsav/web"
+      }
+    }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/apps/api/src/index.ts" },
+    { "src": "/(.*)", "dest": "/apps/web/dist/$1" }
+  ]
+}

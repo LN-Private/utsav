@@ -2,7 +2,7 @@
 # https://supabase.com/docs/guides/cli/getting-started
 
 [project]
-id = "your-project-id"  # Replace with your Supabase project ID
+id = "yqnowtwzyxxstyverecd"  # Replace with your Supabase project ID
 
 [api]
 enabled = true

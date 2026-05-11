@@ -5,7 +5,7 @@ export type PaymentMethod =
   | 'esewa'
   | 'khalti'
   | 'cash'
-  | 'bank-transfer'
+  | 'bank_transfer'
   | 'card';
 
 export type PaymentStatus = 
