@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
-import { SERVICE_CATEGORIES } from '@utsav/shared/constants';
+import { SERVICE_CATEGORIES } from '@utsav/shared';
 import { formatCurrency } from '@/lib/utils';
 
 export const Home: React.FC = () => {

@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
         name: 'Utsav - Nepal Ceremony Marketplace',
         short_name: 'Utsav',
@@ -17,26 +17,14 @@ export default defineConfig({
         display: 'standalone',
         scope: '/',
         start_url: '/',
-        orientation: 'portrait-primary',
-        icons: [
-          {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
-          }
-        ]
+        orientation: 'portrait-primary'
       }
     })
   ],
   resolve: {
     alias: {
       '@': '/src',
-      '@utsav/shared': '/packages/shared/src/index.ts'
+      '@utsav/shared': '../../packages/shared/src/index.ts'
     }
   },
   server: {

@@ -102,20 +102,11 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   });
 });
 
-// ============================================
-// Start Server
-// ============================================
-
-app.listen(PORT, () => {
-  console.log(`🚀 Utsav API running on port ${PORT}`);
-  console.log(`📍 Health check: http://localhost:${PORT}/health`);
-  console.log(`🔐 Auth routes: http://localhost:${PORT}/api/auth`);
-  console.log(`👤 User routes: http://localhost:${PORT}/api/users`);
-  console.log(`📸 Service routes: http://localhost:${PORT}/api/services`);
-  console.log(`📅 Booking routes: http://localhost:${PORT}/api/bookings`);
-  console.log(`💳 Payment routes: http://localhost:${PORT}/api/payments`);
-  console.log(`⭐ Review routes: http://localhost:${PORT}/api/reviews`);
-  console.log(`🛠️ Admin routes: http://localhost:${PORT}/api/admin`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`🚀 Utsav API running on port ${PORT}`);
+    console.log(`📍 Health check: http://localhost:${PORT}/health`);
+  });
+}
 
 export default app;

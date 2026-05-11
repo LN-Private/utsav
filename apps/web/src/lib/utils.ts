@@ -1,4 +1,4 @@
-import { CURRENCY } from '@utsav/shared/constants';
+import { CURRENCY } from '@utsav/shared';
 
 export const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('ne-NP', {

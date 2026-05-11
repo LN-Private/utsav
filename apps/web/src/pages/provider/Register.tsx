@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
-import { SERVICE_CATEGORIES } from '@utsav/shared/constants';
+import { SERVICE_CATEGORIES } from '@utsav/shared';
 import { validateNepaliPhone } from '@/lib/utils';
 import { useAuthStore } from '@/lib/store';
 

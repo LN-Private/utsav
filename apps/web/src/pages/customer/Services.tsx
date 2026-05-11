@@ -3,7 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Rating } from '@/components/ui/Rating';
-import { SERVICE_CATEGORIES } from '@utsav/shared/constants';
+import { SERVICE_CATEGORIES } from '@utsav/shared';
 import { formatCurrency, getServiceCategoryIcon } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
